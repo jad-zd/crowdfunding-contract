@@ -82,3 +82,25 @@ test("crowdfunding funding test", async () => {
     code: "file:output/contract.wasm",
   });
 });
+
+test("trying to fund one block too late", async () => {
+  const donor = await world.createWallet({
+    nonce: 0,
+    balance: 400_000_000_000n,
+  });
+
+  world.setCurrentBlockInfo({
+    timestamp: 123_001,
+  });
+
+  await donor
+    .callContract({
+      callee: contract,
+      value: 10_000_000_000n,
+      funcName: "fund",
+      funcArgs: [],
+      gasLimit: 100_000_000,
+      gasPrice: 0,
+    })
+    .assertFail({ code: 4, message: "cannot fund after deadline" });
+});

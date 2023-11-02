@@ -26,6 +26,13 @@ pub trait Crowdfunding {
     #[payable("EGLD")]
     fn fund(&self) {
         let payment = self.call_value().egld_value();
+
+        let current_time = self.blockchain().get_block_timestamp();
+        require!(
+            current_time < self.deadline().get(),
+            "cannot fund after deadline"
+        );
+
         let caller = self.blockchain().get_caller();
         self.deposit(&caller)
             .update(|deposit| *deposit += &*payment);
