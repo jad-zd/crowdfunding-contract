@@ -1,6 +1,7 @@
 #![no_std]
 
 multiversx_sc::imports!();
+multiversx_sc::derive_imports!();
 
 #[multiversx_sc::contract]
 pub trait Crowdfunding {
@@ -37,4 +38,28 @@ pub trait Crowdfunding {
         self.deposit(&caller)
             .update(|deposit| *deposit += &*payment);
     }
+
+    #[view]
+    fn status(&self) -> Status {
+        if self.blockchain().get_block_timestamp() <= self.deadline().get() {
+            Status::FundingPeriod
+        } else if self.get_current_funds() >= self.target().get() {
+            Status::Successful
+        } else {
+            Status::Failed
+        }
+    }
+
+    #[view(getCurrentFunds)]
+    fn get_current_funds(&self) -> BigUint {
+        self.blockchain()
+            .get_sc_balance(&EgldOrEsdtTokenIdentifier::egld(), 0)
+    }
+}
+
+#[derive(TopEncode, TopDecode, TypeAbi, PartialEq, Clone, Copy)]
+pub enum Status {
+    FundingPeriod,
+    Successful,
+    Failed,
 }

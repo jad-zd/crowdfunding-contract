@@ -1,5 +1,5 @@
-import { test, beforeEach, afterEach } from "vitest";
-import { assertAccount, SWorld, SWallet, SContract, e } from "xsuite";
+import { test, beforeEach, afterEach, expect } from "vitest";
+import { assertAccount, SWorld, SWallet, SContract, e, d } from "xsuite";
 
 let world: SWorld;
 let deployer: SWallet;
@@ -103,4 +103,13 @@ test("trying to fund one block too late", async () => {
       gasPrice: 0,
     })
     .assertFail({ code: 4, message: "cannot fund after deadline" });
+
+  const { returnData, returnCode, returnMessage } = await world.query({
+    callee: contract,
+    funcName: "status",
+    funcArgs: [],
+  });
+
+  expect(d.U().topDecode(returnData[0])).toEqual(2n); // why does it return a BigUInt ? It is an enum, shouldn't it be a simple u8 ?
+  expect(returnCode).toEqual(0);
 });
