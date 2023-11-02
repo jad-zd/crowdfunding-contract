@@ -21,4 +21,13 @@ pub trait Crowdfunding {
     #[view(getDeposit)]
     #[storage_mapper("deposit")]
     fn deposit(&self, donor: &ManagedAddress) -> SingleValueMapper<BigUint>;
+
+    #[endpoint]
+    #[payable("EGLD")]
+    fn fund(&self) {
+        let payment = self.call_value().egld_value();
+        let caller = self.blockchain().get_caller();
+        self.deposit(&caller)
+            .update(|deposit| *deposit += &*payment);
+    }
 }

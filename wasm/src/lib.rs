@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                            3
+// Endpoints:                            4
 // Async Callback (empty):               1
-// Total number of exported functions:   5
+// Total number of exported functions:   6
 
 #![no_std]
 #![feature(lang_items)]
@@ -21,6 +21,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         getTarget
         getDeadline
         getDeposit
+        fund
     )
 }
 

@@ -41,3 +41,44 @@ test("crowdfunding deployment test", async () => {
     code: "file:output/contract.wasm",
   });
 });
+
+test("crowdfunding funding test", async () => {
+  const donor = await world.createWallet({
+    nonce: 0,
+    balance: 400_000_000_000n,
+  });
+
+  await donor.callContract({
+    callee: contract,
+    value: 250_000_000_000n,
+    funcName: "fund",
+    funcArgs: [],
+    gasLimit: 100_000_000,
+    gasPrice: 0,
+  });
+
+  assertAccount(await deployer.getAccountWithKvs(), {
+    nonce: 1,
+    balance: 1_000_000n,
+    allKvs: [],
+  });
+
+  assertAccount(await donor.getAccountWithKvs(), {
+    nonce: 1,
+    balance: 150_000_000_000n,
+    allKvs: [],
+  });
+
+  assertAccount(await contract.getAccountWithKvs(), {
+    nonce: 0,
+    balance: 250_000_000_000n,
+    allKvs: [
+      e.kvs.Mapper("target").Value(e.U(500_000_000_000n)),
+      e.kvs.Mapper("deadline").Value(e.U64(123_000)),
+      e.kvs
+        .Mapper("deposit", e.Addr(donor.toString()))
+        .Value(e.U(250_000_000_000n)),
+    ],
+    code: "file:output/contract.wasm",
+  });
+});
