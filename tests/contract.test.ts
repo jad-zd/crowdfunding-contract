@@ -15,7 +15,7 @@ beforeEach(async () => {
     code: "file:output/contract.wasm",
     codeMetadata: [],
     gasLimit: 5_000_000,
-    codeArgs: [e.U(500_000_000_000n)],
+    codeArgs: [e.U(500_000_000_000n), e.U64(123_000)],
     gasPrice: 0,
   }));
 });
@@ -34,7 +34,10 @@ test("crowdfunding deployment test", async () => {
   assertAccount(await contract.getAccountWithKvs(), {
     nonce: 0,
     balance: 0n,
-    allKvs: [e.kvs.Mapper("target").Value(e.U(500_000_000_000n))],
+    allKvs: [
+      e.kvs.Mapper("target").Value(e.U(500_000_000_000n)),
+      e.kvs.Mapper("deadline").Value(e.U64(123_000)),
+    ],
     code: "file:output/contract.wasm",
   });
 });
