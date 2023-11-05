@@ -55,6 +55,32 @@ pub trait Crowdfunding {
         self.blockchain()
             .get_sc_balance(&EgldOrEsdtTokenIdentifier::egld(), 0)
     }
+
+    #[endpoint]
+    fn claim(&self) {
+        match self.status() {
+            Status::FundingPeriod => sc_panic!("cannot claim before deadline"),
+            Status::Successful => {
+                let caller = self.blockchain().get_caller();
+                require!(
+                    caller == self.blockchain().get_owner_address(),
+                    "only owner can claim successful funding"
+                );
+
+                let sc_balance = self.get_current_funds();
+                self.send().direct_egld(&caller, &sc_balance);
+            }
+            Status::Failed => {
+                let caller = self.blockchain().get_caller();
+                let deposit = self.deposit(&caller).get();
+
+                if deposit > 0u32 {
+                    self.deposit(&caller).clear();
+                    self.send().direct_egld(&caller, &deposit);
+                }
+            }
+        }
+    }
 }
 
 #[derive(TopEncode, TopDecode, TypeAbi, PartialEq, Clone, Copy)]
