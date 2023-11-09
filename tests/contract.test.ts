@@ -89,7 +89,7 @@ test("trying to fund one block too late", async () => {
     balance: 400_000_000_000n,
   });
 
-  world.setCurrentBlockInfo({
+  await world.setCurrentBlockInfo({
     timestamp: 123_001,
   });
 
@@ -154,41 +154,19 @@ test("trying to claim before the deadline", async () => {
     code: "file:output/contract.wasm",
   });
 
-  // I GET
-  // Serialized Error: {
-  //   "code": "ECONNRESET",
-  //   "errno": -104,
-  //   "syscall": "read",
-  // }
-  // WHEN I UNCOMMENT THIS !!!!!!
-  // world.setCurrentBlockInfo({
-  //   timestamp: 122_000,
-  // });
+  await world.setCurrentBlockInfo({
+    timestamp: 122_000,
+  });
 
-  // I GET
-  // Serialized Error: {
-  //   "code": "UND_ERR_SOCKET",
-  //   "socket": {
-  //     "bytesRead": 309,
-  //     "bytesWritten": 763,
-  //     "localAddress": "127.0.0.1",
-  //     "localPort": 47422,
-  //     "remoteAddress": undefined,
-  //     "remoteFamily": undefined,
-  //     "remotePort": undefined,
-  //     "timeout": undefined,
-  //   },
-  // }
-  // WHEN I UNCOMMENT THIS !!!!!!!
-  // deployer
-  //   .callContract({
-  //     callee: contract,
-  //     funcName: "claim",
-  //     funcArgs: [],
-  //     gasLimit: 100_000_000,
-  //     gasPrice: 0,
-  //   })
-  //   .assertFail({ code: 4, message: "cannot claim before deadline" });
+  await deployer
+    .callContract({
+      callee: contract,
+      funcName: "claim",
+      funcArgs: [],
+      gasLimit: 100_000_000,
+      gasPrice: 0,
+    })
+    .assertFail({ code: 4, message: "cannot claim before deadline" });
 });
 
 test("trying to claim after the deadline with a successful crowdfunding", async () => {
@@ -337,7 +315,7 @@ test("trying to claim after the deadline with a failed crowdfunding", async () =
     gasPrice: 0,
   });
 
-  // He receive nothing
+  // He receives nothing
   assertAccount(await nonDonor.getAccountWithKvs(), {
     nonce: 1,
     balance: 1_000n,
